@@ -3,11 +3,8 @@ import { useRef, useState } from "react";
 import {
   StyleSheet,
   ImageBackground,
-  Text,
   View,
   Button,
-  TextInput,
-  ScrollView,
   FlatList,
 } from "react-native";
 import Items from "./componentes/Items";
@@ -16,62 +13,83 @@ import Input from "./componentes/Input";
 export default function App() {
   let [input, setInput] = useState("");
   const [tareas, setTareas] = useState([]);
+  const [show, setShow] = useState(false);
 
   const refInput = useRef("");
 
+  function mostrarModal() {
+    setShow(!show);
+  }
   const image = {
     uri: "https://images.unsplash.com/photo-1660422605160-7be25e219853?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1997&q=80",
   };
-
   function handleTexto(e) {
     setInput(e);
   }
 
   function handleAgregarTarea() {
-    // setTareas((tareasActuales) => [
-    //   ...tareasActuales,
-    //   { texto: input, key: tareas.length + "" + input },
-    // ]);
-    setTareas((tareasActuales) => [
-      ...tareasActuales,
-      { texto: input, id: tareas.length + "" + input },
-    ]);
+    if (input !== "") {
+      setTareas((tareasActuales) => [
+        ...tareasActuales,
+        { texto: input, id: tareas.length + "" + input },
+      ]);
+      setInput("");
+      setShow(!show);
+    }
   }
 
   function handleBorrarTarea(o) {
-    let tareasFiltradas = tareas.filter((i, index) => index !== o);
-    setTareas(tareasFiltradas);
+    setTareas((tareasActuales) => {
+      return tareasActuales.filter((i, index) => index !== o);
+    });
+
     console.log(refInput.current);
   }
 
   return (
-    <View style={styles.contenedorApp}>
-      <ImageBackground source={image} style={styles.imagen}>
-        <Input
-          handleTexto={handleTexto}
-          handleAgregarTarea={handleAgregarTarea}
-          refInput={refInput}
-        />
-        <View style={styles.contenedorLista}>
-          <FlatList
-            keyExtractor={(item, index) => {
-              return item.id;
-            }}
-            data={tareas}
-            renderItem={(i) => {
-              i.index;
-              return (
-                <Items
-                  i={i}
-                  handleBorrarTarea={handleBorrarTarea}
-                  refInput={refInput}
-                />
-              );
-            }}
+    <>
+      <StatusBar style={show ? "light" : "dark"} />
+      <ImageBackground
+        // source={require("./assets/img/Fondo.avif")}
+        source={image}
+        style={styles.imagen}
+      >
+        <View style={styles.contenedorApp}>
+          <Input
+            handleTexto={handleTexto}
+            handleAgregarTarea={handleAgregarTarea}
+            input={input}
+            show={show}
+            setShow={setShow}
+          />
+          <View style={styles.contenedorLista}>
+            <FlatList
+              keyExtractor={(item, index) => {
+                return item.id;
+              }}
+              data={tareas}
+              renderItem={(i) => {
+                i.index;
+                return (
+                  <Items
+                    i={i}
+                    handleBorrarTarea={handleBorrarTarea}
+                    refInput={refInput}
+                  />
+                );
+              }}
+            />
+          </View>
+        </View>
+        <View style={styles.contenedorBoton}>
+          <Button
+            title="Agregar nueva tarea"
+            // color="#fafafa"
+            onPress={mostrarModal}
           />
         </View>
       </ImageBackground>
-    </View>
+    </>
   );
 }
 
@@ -86,6 +104,7 @@ const styles = StyleSheet.create({
     // width: "100%",
     // justifyContent: "center",
     paddingHorizontal: 16,
+    // paddingBottom: 60,
   },
   contenedorInput: {
     flex: 1,
@@ -95,6 +114,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderBottomWidth: 1,
     borderBottomColor: "#cccccc",
+  },
+  contenedorBoton: {
+    backgroundColor: "#cccccc",
+    borderRadius: 16,
+    marginTop: 3,
+    marginBottom: 50,
   },
   inputTexto: {
     borderWidth: 1,
